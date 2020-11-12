@@ -1,1 +1,0 @@
-/Users/leomendez/Documents/Creditas/AwsLamdaTemplate/build/classes/kotlin/main/com/event/Apigateway.class:/Users/leomendez/Documents/Creditas/AwsLamdaTemplate/build/classes/kotlin/main/com/event/DynamoDBStream.class:/Users/leomendez/Documents/Creditas/AwsLamdaTemplate/build/classes/kotlin/main/com/event/EventBridge.class
