@@ -1,0 +1,114 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'Template AWS Lambda SAM Kotlin Project
+
+  '
+Globals:
+  Function:
+    Timeout: 30
+    Tracing: Active
+Parameters:
+  Environment:
+    Default: development
+    Type: String
+    AllowedValues:
+    - staging
+    - production
+    - development
+    Description: The environment for deployment
+Resources:
+  HttpApi:
+    Type: AWS::Serverless::HttpApi
+    AccessLogSettings:
+      DestinationArn:
+        Fn::GetAtt:
+        - HttpApiAccessLogs
+        - Arn
+    StageName:
+      Ref: Environment
+    AutoDeploy: true
+    Tags:
+      Environment:
+        Ref: Environment
+  HttpApiAccessLogs:
+    Type: AWS::Logs::LogGroup
+  APIStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId:
+        Ref: RestApi
+  APIGatewayFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: APIGatewayFunction
+      Handler: com.event.Apigateway::handleRequest
+      Runtime: java11
+      Policies:
+      - AWSConfigRulesExecutionRole
+      - AWSLambdaReadOnlyAccess
+      - AWSXrayWriteOnlyAccess
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: DynamoDBTable
+      Events:
+        HttpEvent:
+          Type: HttpApi
+          Properties:
+            Path: /
+            Method: GET
+            PayloadFormatVersion: '2.0'
+            ApiId:
+              Ref: HttpApi
+  DynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+      - AttributeName: id
+        AttributeType: S
+      KeySchema:
+      - AttributeName: id
+        KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      StreamSpecification:
+        StreamViewType: NEW_IMAGE
+  ScheduledEventFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ScheduledEventFunction
+      Handler: com.event.EventBridge::handleRequest
+      Runtime: java11
+      Policies:
+      - AWSLambdaBasicExecutionRole
+      - AWSLambdaReadOnlyAccess
+      - AWSXrayWriteOnlyAccess
+      Events:
+        EventBridge:
+          Type: CloudWatchEvent
+  StreamFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: StreamFunction
+      Handler: com.event.DynamoDBStream::handleRequest
+      Runtime: java11
+      Policies:
+      - AWSLambdaBasicExecutionRole
+      - AWSLambdaReadOnlyAccess
+      - AWSXrayWriteOnlyAccess
+      Events:
+        StreamEvent:
+          Type: DynamoDB
+          Properties:
+            Stream:
+              Fn::GetAtt:
+              - SimpleTable
+              - StreamArn
+            MaximumRetryAttempts: 2
+            StartingPosition: TRIM_HORIZON
+            BatchSize: 50
+Outputs:
+  HttpApiUrl:
+    Description: URL of your API endpoint
+    Value:
+      Fn::Sub: https://${HttpApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/${Environment}/

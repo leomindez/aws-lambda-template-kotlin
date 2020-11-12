@@ -1,0 +1,1 @@
+sam local generate-event cloudwatch scheduled-event local invoke ScheduledEventFunction
