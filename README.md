@@ -15,12 +15,12 @@ Which template source would you like to use?
         1 - AWS Quick Start Templates
         2 - Custom Template Location
 Choice: 2
-Template location (git, mercurial, http(s), zip, path): git@github.com:leomendezji/aws-lambda-template.git
+Template location (git, mercurial, http(s), zip, path): git@github.com:leomindez/aws-lambda-template-kotlin.git
 ```
 - Initializes a new SAM project using custom template in a Git/Mercurial repository
  ```bash
 # gh being expanded to github url
-$ sam init --location git@github.com:leomendezji/aws-lambda-template.git
+$ sam init --location git@github.com:leomindez/aws-lambda-template-kotlin.git
 ```
 
 See the [AWS SAM developer guide](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html) for an introduction to SAM specification, the SAM CLI, and serverless application concepts.
@@ -69,14 +69,14 @@ Build your application with the `sam build` command.
 sam-app$ sam build
 ```
 
-The SAM CLI installs dependencies defined in `HelloWorldFunction/build.gradle`, creates a deployment package, and saves it in the `.aws-sam/build` folder.
+The SAM CLI installs dependencies defined in `AwsLamdaTemplate/build.gradle`, creates a deployment package, and saves it in the `.aws-sam/build` folder.
 
 Test a single function by invoking it directly with a test event. An event is a JSON document that represents the input that the function receives from the event source. Test events are included in the `events` folder in this project.
 
 Run functions locally and invoke them with the `sam local invoke` command.
 
 ```bash
-sam-app$ sam local invoke HelloWorldFunction --event events/event.json
+sam-app$ sam local invoke YourFunctionName --event events/event.json
 ```
 
 The SAM CLI reads the application template to determine the EventBridge rule pattern and the functions that they invoke as a target. The `Events` property on each function's definition includes the source and detail-type of the types of events that will invoke the function.
